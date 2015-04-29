@@ -1,0 +1,16 @@
+modelVersion: "4.0.0"
+groupId: com.socketek.prototypes.storm
+artifactId: storm-sample
+version: "0.1.0"
+packaging: jar
+
+dependencies:
+- groupId: org.apache.storm
+  artifactId: storm-core
+  version: "0.9.4"
+  scope: provided
+
+build:
+  sourceDirectory: src
+  resources:
+    - directory: "${basedir}/multilang"
