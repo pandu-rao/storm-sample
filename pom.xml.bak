@@ -17,6 +17,13 @@
       <!-- keep storm out of the jar-with-dependencies -->
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>1.15</version>
+      <!-- keep storm out of the jar-with-dependencies -->
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
   <build>

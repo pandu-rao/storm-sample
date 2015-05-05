@@ -12,6 +12,7 @@ dependencies:
 - groupId: org.yaml
   artifactId: snakeyaml
   version: "1.15"
+  scope: provided
 
 build:
   sourceDirectory: src
