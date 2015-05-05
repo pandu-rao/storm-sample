@@ -1,0 +1,54 @@
+#!/bin/bash
+
+type_=$1
+
+#
+# shell yaml parser
+# http://stackoverflow.com/a/21189044
+#
+function parse_yaml {
+   local prefix=$2
+   local s='[[:space:]]*' w='[a-zA-Z0-9_]*' fs=$(echo @|tr @ '\034')
+   sed -ne "s|^\($s\):|\1|" \
+	-e "s|^\($s\)\($w\)$s:$s[\"']\(.*\)[\"']$s\$|\1$fs\2$fs\3|p" \
+	-e "s|^\($s\)\($w\)$s:$s\(.*\)$s\$|\1$fs\2$fs\3|p"  $1 |
+   awk -F$fs '{
+      indent = length($1)/2;
+      vname[indent] = $2;
+      for (i in vname) {if (i > indent) {delete vname[i]}}
+      if (length($3) > 0) {
+	 vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("_")}
+	 printf("%s%s%s=\"%s\"\n", "'$prefix'",vn, $2, $3);
+      }
+   }'
+}
+
+eval $(parse_yaml 'storm-sample.yml');
+
+args="";
+
+if [ "$mode" ==  "docker" ]; then
+    args="-c nimbus.host=localhost -c nimbus.thrift.port=49627";
+fi
+
+jar="target/storm-sample-0.1.0.jar";
+main_class="com.socketek.prototypes.storm";
+
+if [ "$type_" == "loopback" ]; then
+    main_class="$main_class"."SampleTopology";
+    name="";
+    filter="grep -B2 -A4 'HELLO'";
+elif [ "$type_" == "server" ]; then
+    main_class="$main_class"."SampleTopology";
+    name="sample";
+    filter="cat";
+elif [ "$type_" == "client" ]; then
+    main_class="$main_class"."SampleClient";
+    name="";
+    filter="grep -B2 -A4 'HELLO'";
+else
+    echo "Usage: topology [loopback|server|client]";
+    exit -1;
+fi
+
+storm jar $jar $main_class $name $args | eval $filter;

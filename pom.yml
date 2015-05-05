@@ -9,6 +9,9 @@ dependencies:
   artifactId: storm-core
   version: "0.9.4"
   scope: provided
+- groupId: org.yaml
+  artifactId: snakeyaml
+  version: "1.15"
 
 build:
   sourceDirectory: src

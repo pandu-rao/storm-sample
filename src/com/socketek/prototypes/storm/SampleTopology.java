@@ -26,6 +26,8 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 
+import com.socketek.prototypes.storm.SampleConfig;
+
 public class SampleTopology {
     // a bolt that does not spawn an external shell process
     public static class SelfBolt extends BaseBasicBolt {
@@ -86,9 +88,12 @@ public class SampleTopology {
 	    cluster.shutdown();
 	    drpc.shutdown();
 	} else {
-	    List<String> drpc_servers = new ArrayList<String>();
-	    drpc_servers.add("127.0.0.1");
-	    conf.put(Config.DRPC_SERVERS, drpc_servers);
+	    List<String> drpcServers = new ArrayList<String>();
+
+	    String drpcServer = SampleConfig.getDrpcServer();
+	    drpcServers.add(drpcServer);
+
+	    conf.put(Config.DRPC_SERVERS, drpcServers);
 	    conf.setNumWorkers(3);
 
 	    DRPCSpout spout = new DRPCSpout("to_upper");

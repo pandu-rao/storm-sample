@@ -1,0 +1,9 @@
+mode: local
+
+local:
+  drpc_server: "localhost"
+  drpc_port: 3772
+
+docker:
+  drpc_server: "172.17.0.73"
+  drpc_port: 49772

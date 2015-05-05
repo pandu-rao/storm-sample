@@ -2,10 +2,13 @@ package com.socketek.prototypes.storm;
 
 import backtype.storm.utils.DRPCClient;
 
+import com.socketek.prototypes.storm.SampleConfig;
+
 public class SampleClient {
     public static void main(String[] args) throws Exception {
 	System.out.println("Start");
-	DRPCClient client = new DRPCClient("localhost", 3772);
+	int drpcPort = SampleConfig.getDrpcPort();
+	DRPCClient client = new DRPCClient("localhost", drpcPort);
 
 	long startTime = System.nanoTime();
 	String out = client.execute("to_upper", "hello");
