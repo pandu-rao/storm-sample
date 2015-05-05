@@ -34,7 +34,7 @@ fi
 jar="target/storm-sample-0.1.0.jar";
 main_class="com.socketek.prototypes.storm";
 
-if [ "$type_" == "loopback" ]; then
+if [ "$type_" == "local" ]; then
     main_class="$main_class"."SampleTopology";
     name="";
     filter="grep -B2 -A4 'HELLO'";
@@ -47,7 +47,7 @@ elif [ "$type_" == "client" ]; then
     name="";
     filter="grep -B2 -A4 'HELLO'";
 else
-    echo "Usage: topology [loopback|server|client]";
+    echo "Usage: topology [local|server|client]";
     exit -1;
 fi
 
