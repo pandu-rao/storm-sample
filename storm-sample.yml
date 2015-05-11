@@ -1,4 +1,4 @@
-mode: docker
+mode: local
 
 local:
   drpc_server: "localhost"
