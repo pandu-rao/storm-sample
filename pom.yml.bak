@@ -1,0 +1,48 @@
+modelVersion: "4.0.0"
+groupId: com.socketek.prototypes.storm
+artifactId: storm-sample
+version: "0.1.0"
+packaging: jar
+
+dependencies:
+- groupId: org.apache.storm
+  artifactId: storm-core
+  version: "0.9.4"
+  scope: provided
+- groupId: org.yaml
+  artifactId: snakeyaml
+  version: "1.15"
+  scope: provided
+- groupId: org.apache.logging.log4j
+  artifactId: log4j-api
+  version: "2.3"
+  scope: provided
+- groupId: org.apache.logging.log4j
+  artifactId: log4j-core
+  version: "2.3"
+  scope: provided
+- groupId: mysql
+  artifactId: mysql-connector-java
+  version: "5.1.35"
+  scope: runtime
+
+build:
+  sourceDirectory: src
+  resources:
+    - directory: "${basedir}/multilang"
+  plugins:
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-assembly-plugin
+      version: "2.5.4"
+      configuration:
+        # should work, but fails. most likely a bug in polyglot-yaml 0.1.9
+        descriptorRefs:
+          - jar-with-dependencies
+        archive:
+          manifest:
+            mainClass: ""
+      executions:
+        - id: make-assembly
+          phase: package
+          goals:
+            - single

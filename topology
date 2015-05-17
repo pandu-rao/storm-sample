@@ -31,7 +31,7 @@ if [ "$mode" ==  "docker" ]; then
     args="-c nimbus.host=localhost -c nimbus.thrift.port=49627";
 fi
 
-jar="target/storm-sample-0.1.0.jar";
+jar="target/storm-sample-0.1.0-jar-with-dependencies.jar";
 main_class="com.socketek.prototypes.storm";
 
 if [ "$type_" == "local" ]; then

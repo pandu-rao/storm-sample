@@ -13,12 +13,12 @@ public class SampleClient {
 	long startTime = System.nanoTime();
 	String out = client.execute("to_upper", "hello");
 	long endTime = System.nanoTime();
-	double processingTime = (endTime - startTime) / 1000000000.0;
+	double processingTime = (endTime - startTime) / 1000000.0;
 
 	String s = "****************************************\n";
 	System.out.println(s + s + out + "\n" + s + s);
 
-	System.out.printf("Processing time: %f seconds\n", processingTime);
+	System.out.printf("Processing time: %f ms\n", processingTime);
 	System.out.println("End");
     }
 }
