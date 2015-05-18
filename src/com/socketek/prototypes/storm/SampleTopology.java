@@ -44,8 +44,7 @@ import com.socketek.prototypes.storm.SampleConfig;
 public class SampleTopology {
     private static final Logger LOG = Logger.getLogger(SampleTopology.class);
     private static final String DATABASE_DRIVER = "com.mysql.jdbc.Driver";
-
-    private static final String DATABASE_URL = "jdbc:mysql://localhost:33066/operations?user=mongoose&password=password";
+    private static final String DATABASE_URL = "DATABASE_URL";
 
     private static Connection connection = null;
 
@@ -63,8 +62,9 @@ public class SampleTopology {
 	    }
 
 	    try {
+		String databaseUrl = (String)stormConf.get(DATABASE_URL);
 		Class.forName(DATABASE_DRIVER);
-		connection = DriverManager.getConnection(DATABASE_URL);
+		connection = DriverManager.getConnection(databaseUrl);
 	    } catch (ClassNotFoundException e) {
 		LOG.error("Failed to load %s".format(DATABASE_DRIVER));
 		e.printStackTrace();
@@ -79,6 +79,7 @@ public class SampleTopology {
 	    String input = tuple.getString(0);
 	    Object retInfo = tuple.getValue(1);
 
+	    String result = "";
 	    try {
 		String sql = "select index_ from feature where id in ";
 		sql += "(select feature_id from model_feature where model_id=1 and item_id=1000)";
@@ -89,6 +90,7 @@ public class SampleTopology {
 		while (resultSet.next()) {
 		    Integer index_ = resultSet.getInt("index_");
 		    indexes.add(index_);
+		    result += ":" + Integer.toString(index_);
 		}
 
 		LOG.info(indexes);
@@ -97,7 +99,7 @@ public class SampleTopology {
 		e.printStackTrace();
 	    }
 
-	    collector.emit(new Values(input.toUpperCase(), retInfo));
+	    collector.emit(new Values(input.toUpperCase() + result, retInfo));
 	}
     }
 
@@ -164,6 +166,9 @@ public class SampleTopology {
 
 	    conf.put(Config.DRPC_SERVERS, drpcServers);
 	    conf.setNumWorkers(3);
+
+	    String databaseUrl = SampleConfig.getDatabaseUrl();
+	    conf.put(DATABASE_URL, databaseUrl);
 
 	    builder = getTopologyBuilder(null);
 

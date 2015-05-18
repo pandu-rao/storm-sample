@@ -3,9 +3,11 @@ mode: local
 local:
   drpc_server: "localhost"
   drpc_port: 3772
+  database_url: "jdbc:mysql://localhost:33066/operations?user=mongoose&password=password"
 
 # run dds.sh to get ip address
 # of docker drpc server
 docker:
   drpc_server: ""
   drpc_port: 49772
+  database_url: "jdbc:mysql://db:3306/operations?user=mongoose&password=password"

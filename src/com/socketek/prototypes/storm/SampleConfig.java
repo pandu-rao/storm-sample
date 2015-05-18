@@ -41,4 +41,18 @@ public class SampleConfig {
 
 	return drpcPort;
     }
+
+    public static String getDatabaseUrl() throws FileNotFoundException {
+	File file = new File(CONFIG_FILE);
+	InputStream input = new FileInputStream(file);
+
+	Yaml yaml = new Yaml();
+
+	Map config = (Map) yaml.load(input);
+	Object mode = config.get("mode");
+	Map stormType = (Map) config.get(mode);
+	String databaseUrl = (String) stormType.get("database_url");
+
+	return databaseUrl;
+    }
 }
