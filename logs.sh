@@ -14,13 +14,13 @@ worker_log_6703="$log_dir/worker-6703.log";
 
 
 multitail -s 2 -Z red,black,inverse -T               \
-	  -x "%m %u@%h %f (%t) [%l]" -b 8            \
-	  -f -m 0 -n 77 -ci blue    $nimbus_log      \
-	  -f -m 0 -n 77 -ci blue    $supervisor_log  \
-	  -f -m 0 -n 77 -ci blue    $drpc_log        \
-	  -f -m 0 -n 77 -ci black   $ui_log          \
-	  -f -m 0 -n 77 -ci magenta $worker_log_6700 \
-	  -f -m 0 -n 77 -ci magenta $worker_log_6701 \
-	  -f -m 0 -n 77 -ci magenta $worker_log_6702 \
-	  -f -m 0 -n 77 -ci magenta $worker_log_6703 \
+          -x "%m %u@%h %f (%t) [%l]" -b 8            \
+          -f -m 0 -n 77 -ci blue    $nimbus_log      \
+          -f -m 0 -n 77 -ci blue    $supervisor_log  \
+          -f -m 0 -n 77 -ci blue    $drpc_log        \
+          -f -m 0 -n 77 -ci black   $ui_log          \
+          -f -m 0 -n 77 -ci magenta $worker_log_6700 \
+          -f -m 0 -n 77 -ci magenta $worker_log_6701 \
+          -f -m 0 -n 77 -ci magenta $worker_log_6702 \
+          -f -m 0 -n 77 -ci magenta $worker_log_6703 \
 ;

@@ -50,129 +50,129 @@ public class SampleTopology {
 
     // a bolt that reads data from a database
     public static class DatabaseBolt extends BaseBasicBolt {
-	@Override
-	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-	    declarer.declare(new Fields("result", "return-info"));
-	}
+        @Override
+        public void declareOutputFields(OutputFieldsDeclarer declarer) {
+            declarer.declare(new Fields("result", "return-info"));
+        }
 
-	@Override
-	public void prepare(Map stormConf, TopologyContext context) {
-	    if (connection != null) {
-		return;
-	    }
+        @Override
+        public void prepare(Map stormConf, TopologyContext context) {
+            if (connection != null) {
+                return;
+            }
 
-	    try {
-		String databaseUrl = (String)stormConf.get(DATABASE_URL);
-		Class.forName(DATABASE_DRIVER);
-		connection = DriverManager.getConnection(databaseUrl);
-	    } catch (ClassNotFoundException e) {
-		LOG.error("Failed to load %s".format(DATABASE_DRIVER));
-		e.printStackTrace();
-	    } catch (SQLException e) {
-		LOG.error("Caught SQLException");
-		e.printStackTrace();
-	    }
-	}
+            try {
+                String databaseUrl = (String)stormConf.get(DATABASE_URL);
+                Class.forName(DATABASE_DRIVER);
+                connection = DriverManager.getConnection(databaseUrl);
+            } catch (ClassNotFoundException e) {
+                LOG.error("Failed to load %s".format(DATABASE_DRIVER));
+                e.printStackTrace();
+            } catch (SQLException e) {
+                LOG.error("Caught SQLException");
+                e.printStackTrace();
+            }
+        }
 
-	@Override
-	public void execute(Tuple tuple, BasicOutputCollector collector) {
-	    String input = tuple.getString(0);
-	    Object retInfo = tuple.getValue(1);
+        @Override
+        public void execute(Tuple tuple, BasicOutputCollector collector) {
+            String input = tuple.getString(0);
+            Object retInfo = tuple.getValue(1);
 
-	    String result = "";
-	    try {
-		String sql = "select index_ from feature where id in ";
-		sql += "(select feature_id from model_feature where model_id=1 and item_id=1000)";
+            String result = "";
+            try {
+                String sql = "select index_ from feature where id in ";
+                sql += "(select feature_id from model_feature where model_id=1 and item_id=1000)";
 
-		Statement statement = connection.createStatement();
-		ResultSet resultSet = statement.executeQuery(sql);
-		List indexes = new ArrayList();
-		while (resultSet.next()) {
-		    Integer index_ = resultSet.getInt("index_");
-		    indexes.add(index_);
-		    result += ":" + Integer.toString(index_);
-		}
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery(sql);
+                List indexes = new ArrayList();
+                while (resultSet.next()) {
+                    Integer index_ = resultSet.getInt("index_");
+                    indexes.add(index_);
+                    result += ":" + Integer.toString(index_);
+                }
 
-		LOG.info(indexes);
-	    } catch (SQLException e) {
-		LOG.error("Caught SQLException");
-		e.printStackTrace();
-	    }
+                LOG.info(indexes);
+            } catch (SQLException e) {
+                LOG.error("Caught SQLException");
+                e.printStackTrace();
+            }
 
-	    collector.emit(new Values(input.toUpperCase() + result, retInfo));
-	}
+            collector.emit(new Values(input.toUpperCase() + result, retInfo));
+        }
     }
 
     public static class PythonBolt extends ShellBolt implements IRichBolt {
-	// todo: study serial version uid
-	private static final long serialVersionUID = -2944145284614143111L;
+        // todo: study serial version uid
+        private static final long serialVersionUID = -2944145284614143111L;
 
-	public PythonBolt()	{
-	    super("python", "python_bolt.py");
-	}
+        public PythonBolt() {
+            super("python", "python_bolt.py");
+        }
 
-	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-	    declarer.declare(new Fields("result", "return-info"));
-	}
+        public void declareOutputFields(OutputFieldsDeclarer declarer) {
+            declarer.declare(new Fields("result", "return-info"));
+        }
 
-	public Map<String, Object> getComponentConfiguration() {
-	    return null;
-	}
+        public Map<String, Object> getComponentConfiguration() {
+            return null;
+        }
     }
 
     public static TopologyBuilder getTopologyBuilder(LocalDRPC drpc) {
-	DRPCSpout spout = null;
-	if (drpc == null) {
-	    spout = new DRPCSpout("to_upper");
-	} else {
-	    spout = new DRPCSpout("to_upper", drpc);
-	}
+        DRPCSpout spout = null;
+        if (drpc == null) {
+            spout = new DRPCSpout("to_upper");
+        } else {
+            spout = new DRPCSpout("to_upper", drpc);
+        }
 
-	TopologyBuilder builder = new TopologyBuilder();
-	builder.setSpout("drpc", spout);
-	builder.setBolt("pythonbolt", new PythonBolt(), 3).shuffleGrouping("drpc");
-	builder.setBolt("databasebolt", new DatabaseBolt(), 3).shuffleGrouping("pythonbolt");
-	builder.setBolt("return", new ReturnResults(), 3).shuffleGrouping("databasebolt");
+        TopologyBuilder builder = new TopologyBuilder();
+        builder.setSpout("drpc", spout);
+        builder.setBolt("pythonbolt", new PythonBolt(), 3).shuffleGrouping("drpc");
+        builder.setBolt("databasebolt", new DatabaseBolt(), 3).shuffleGrouping("pythonbolt");
+        builder.setBolt("return", new ReturnResults(), 3).shuffleGrouping("databasebolt");
 
-	return builder;
+        return builder;
     }
 
     public static void main(String[] args) throws Exception {
-	Config conf = new Config();
-	TopologyBuilder builder = null;
+        Config conf = new Config();
+        TopologyBuilder builder = null;
 
-	if (args == null || args.length == 0) {
-	    LocalDRPC drpc = new LocalDRPC();
-	    builder = getTopologyBuilder(drpc);
-	    LocalCluster cluster = new LocalCluster();
-	    cluster.submitTopology("pythonbolt", conf, builder.createTopology());
+        if (args == null || args.length == 0) {
+            LocalDRPC drpc = new LocalDRPC();
+            builder = getTopologyBuilder(drpc);
+            LocalCluster cluster = new LocalCluster();
+            cluster.submitTopology("pythonbolt", conf, builder.createTopology());
 
-	    long startTime = System.nanoTime();
-	    String out = drpc.execute("to_upper", "hello");
-	    long endTime = System.nanoTime();
-	    double processingTime = (endTime - startTime) / 1000000.0;
+            long startTime = System.nanoTime();
+            String out = drpc.execute("to_upper", "hello");
+            long endTime = System.nanoTime();
+            double processingTime = (endTime - startTime) / 1000000.0;
 
-	    String s = "****************************************\n";
-	    System.out.println(s + s + out + "\n" + s + s);
-	    System.out.printf("Processing time: %f ms\n", processingTime);
+            String s = "****************************************\n";
+            System.out.println(s + s + out + "\n" + s + s);
+            System.out.printf("Processing time: %f ms\n", processingTime);
 
-	    cluster.shutdown();
-	    drpc.shutdown();
-	} else {
-	    List<String> drpcServers = new ArrayList<String>();
+            cluster.shutdown();
+            drpc.shutdown();
+        } else {
+            List<String> drpcServers = new ArrayList<String>();
 
-	    String drpcServer = SampleConfig.getDrpcServer();
-	    drpcServers.add(drpcServer);
+            String drpcServer = SampleConfig.getDrpcServer();
+            drpcServers.add(drpcServer);
 
-	    conf.put(Config.DRPC_SERVERS, drpcServers);
-	    conf.setNumWorkers(3);
+            conf.put(Config.DRPC_SERVERS, drpcServers);
+            conf.setNumWorkers(3);
 
-	    String databaseUrl = SampleConfig.getDatabaseUrl();
-	    conf.put(DATABASE_URL, databaseUrl);
+            String databaseUrl = SampleConfig.getDatabaseUrl();
+            conf.put(DATABASE_URL, databaseUrl);
 
-	    builder = getTopologyBuilder(null);
+            builder = getTopologyBuilder(null);
 
-	    StormSubmitter.submitTopologyWithProgressBar(args[0], conf, builder.createTopology());
-	}
+            StormSubmitter.submitTopologyWithProgressBar(args[0], conf, builder.createTopology());
+        }
     }
 }
